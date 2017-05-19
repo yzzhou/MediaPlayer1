@@ -68,7 +68,7 @@ public class Main2Activity extends AppCompatActivity {
             addFragment(cueeentFragment);
         }
 
-        private void addFragment(BaseFragment cueeentFragment) {
+        private void addFragment(Fragment cueeentFragment) {
             if(tempFragment != cueeentFragment){
                 FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
                 if(!cueeentFragment.isAdded()){
