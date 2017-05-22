@@ -21,6 +21,7 @@ public class Utils {
 
     /**
      * 把毫秒转换成：1:20:30这里形式
+     *
      * @param timeMs
      * @return
      */
@@ -41,4 +42,13 @@ public class Utils {
         }
     }
 
-}
+    public boolean isNetUri(String data) {
+        boolean isNetUri = false;
+        if (data != null) {
+            if (data.toLowerCase().startsWith("http") || data.toLowerCase().startsWith("mms") || data.toLowerCase().startsWith("rtsp")) {
+                isNetUri = true;
+            }
+        }
+            return isNetUri;
+        }
+    }
