@@ -43,7 +43,7 @@ public class VitamioVideoPlayerActivity extends AppCompatActivity implements Vie
     private static final int HIDE_MEDIACONTROLLER = 1;
     private static final int DEFUALT_SCREEN = 0;
     private static final int FULL_SCREEN = 1;
-    private myapplication.mediaplayertest.view.VitamioVideoView  vv;
+    private VitamioVideoView  vv;
 
 
     private Uri uri;
@@ -93,11 +93,14 @@ public class VitamioVideoPlayerActivity extends AppCompatActivity implements Vie
 
 
     private void findViews() {
+        Vitamio.isInitialized(getApplicationContext());
+        setContentView(R.layout.activity_vitamio_video_player);
+
         ll_buffering = (LinearLayout)findViewById(R.id.ll_buffering);
         ll_loading = (LinearLayout)findViewById(R.id.ll_loading);
         tv_loading_net_speed = (TextView)findViewById(R.id.tv_loading_net_speed);
         tv_net_speed = (TextView)findViewById(R.id.tv_net_speed);
-        setContentView(R.layout.activity_system_video_player);
+
         llTop = (LinearLayout)findViewById( R.id.ll_top );
         tvName = (TextView)findViewById( R.id.tv_name );
         ivBattery = (ImageView)findViewById( R.id.iv_battery );
@@ -114,7 +117,7 @@ public class VitamioVideoPlayerActivity extends AppCompatActivity implements Vie
         btnStartPause = (Button)findViewById( R.id.btn_start_pause );
         btnNext = (Button)findViewById( R.id.btn_next );
         btnSwitchScreen = (Button)findViewById( R.id.btn_switch_screen );
-        vv = (myapplication.mediaplayertest.view.VitamioVideoView)findViewById(R.id.vv_vitamio);
+        vv = (VitamioVideoView)findViewById(R.id.vv_vitamio);
 
         btnVoice.setOnClickListener( this );
         btnSwitchPlayer.setOnClickListener( this );
@@ -544,6 +547,7 @@ public class VitamioVideoPlayerActivity extends AppCompatActivity implements Vie
     }
 
     private void showErrorDialog() {
+
 
     }
 
