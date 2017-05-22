@@ -92,6 +92,7 @@ public class VitamioVideoPlayerActivity extends AppCompatActivity implements Vie
     private LinearLayout ll_loading;
     private TextView tv_loading_net_speed;
     private TextView tv_net_speed;
+    private int position;
 
 
     private void findViews() {
@@ -142,6 +143,7 @@ public class VitamioVideoPlayerActivity extends AppCompatActivity implements Vie
             }
 
         } else if ( v == btnSwitchPlayer ) {
+            switchPlayer();
 
         } else if ( v == btnExit ) {
 
@@ -175,6 +177,42 @@ public class VitamioVideoPlayerActivity extends AppCompatActivity implements Vie
         handler.removeMessages(HIDE_MEDIACONTROLLER);
         handler.sendEmptyMessageDelayed(HIDE_MEDIACONTROLLER,4000);
     }
+    private void switchPlayer() {
+        new AlertDialog.Builder(this)
+                .setTitle("提示")
+                .setMessage("如果当前播放为万能播放器,如果有色块，播放质量不好,请切换到系统播放器播放")
+                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        startSystemPlayer();
+
+                    }
+                })
+                .setNegativeButton("取消", null)
+                .show();
+    }
+
+    private void startSystemPlayer() {
+        Intent intent = new Intent(this, VitamioVideoView.class);
+        if(mediaItems != null && mediaItems.size() >0){
+
+            //传递列表
+            Bundle bundler = new Bundle();
+            bundler.putSerializable("videolist",mediaItems);
+            intent.putExtras(bundler);
+            //传递位置
+            intent.putExtra("position",position);
+        }else if(uri != null){
+            intent.setData(uri);
+        }
+
+        startActivity(intent);
+
+        //退出系统播放器
+        finish();
+
+    }
+
     private void updateVoice(boolean isMute) {
         if(isMute){
             am.setStreamVolume(AudioManager.STREAM_MUSIC,0,0);
