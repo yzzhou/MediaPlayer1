@@ -1,7 +1,9 @@
 package myapplication.mediaplayertest.activity;
 
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
@@ -473,7 +475,7 @@ public class VitamioVideoPlayerActivity extends AppCompatActivity implements Vie
             public boolean onError(MediaPlayer mp, int what, int extra) {
                // Toast.makeText(VitamioVideoPlayerActivity.this, "播放出错了", Toast.LENGTH_SHORT).show();
                 showErrorDialog();
-                return false;
+                return true;
             }
         });
 
@@ -547,7 +549,18 @@ public class VitamioVideoPlayerActivity extends AppCompatActivity implements Vie
     }
 
     private void showErrorDialog() {
+        new AlertDialog.Builder(this)
+                    .setTitle("提示")
+                    .setMessage("当前视频不能播放，请检查是否有网络或者文件损坏")
+                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            finish();
 
+                        }
+                    })
+                    .setNegativeButton("取消", null)
+                    .show();
 
     }
 
