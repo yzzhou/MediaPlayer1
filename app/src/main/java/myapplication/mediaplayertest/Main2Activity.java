@@ -78,6 +78,9 @@ public class Main2Activity extends AppCompatActivity {
                     ft.add(R.id.fl_content,cueeentFragment);
                 }else{
                     ft.show(cueeentFragment);
+                    if(tempFragment != null){
+                        ft.hide(tempFragment);
+                    }
                 }
                 ft.commit();
                 tempFragment = cueeentFragment;

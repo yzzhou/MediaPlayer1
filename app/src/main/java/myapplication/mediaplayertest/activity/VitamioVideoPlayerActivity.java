@@ -389,6 +389,7 @@ public class VitamioVideoPlayerActivity extends AppCompatActivity implements Vie
         switch (event.getAction()){
             case MotionEvent.ACTION_DOWN:
                 startY = event.getY();
+
                 touchRang =Math.min(screenWidth, screenHeight);
                 currentVolume = am.getStreamVolume(AudioManager.STREAM_MUSIC);
                 handler.removeMessages(HIDE_MEDIACONTROLLER);
@@ -396,21 +397,21 @@ public class VitamioVideoPlayerActivity extends AppCompatActivity implements Vie
             case MotionEvent.ACTION_MOVE:
                 float endY = event.getY();
                 float distanceY = startY - endY;
-                float delta = (distanceY/touchRang)*maxVolume;
+                float delta = (distanceY/touchRang)*maxVoice;
 
                 if(delta != 0){
                     int volum = (int) Math.min(Math.max(currentVolume + delta, 0), maxVoice);
-                    updatavolumeProgress((int) volum);
+                    updatavolumeProgress(volum);
 
                 }
 
-//               startY = event.getY();
+
                 break;
-            case MotionEvent.ACTION_UP://手指离开屏幕
+            case MotionEvent.ACTION_UP:
                 handler.sendEmptyMessageDelayed(HIDE_MEDIACONTROLLER,5000);
                 break;
         }
-        return super.onTouchEvent(event);
+        return true;
     }
 
 
@@ -418,6 +419,7 @@ public class VitamioVideoPlayerActivity extends AppCompatActivity implements Vie
         am.setStreamVolume(AudioManager.STREAM_MUSIC, volum, 0);
         seekbarVoice.setProgress(volum);
         currentVoice = volum;
+
         if(volum <=0){
             isMute = true;
         }else{
@@ -502,6 +504,7 @@ public class VitamioVideoPlayerActivity extends AppCompatActivity implements Vie
                 seekbarVideo.setMax(duration);
                 tvDuration.setText(utils.stringForTime(duration));
                 vv.start();
+                ll_loading.setVisibility(View.GONE);
                 handler.sendEmptyMessage(PROGRESS);
                 hideMediaController();
                 setVideoType(DEFUALT_SCREEN);
@@ -644,7 +647,7 @@ public class VitamioVideoPlayerActivity extends AppCompatActivity implements Vie
     }
 
     private void setButtonstatus() {
-        if (mediaItems.size() > 0 && mediaItems != null) {
+        if ( mediaItems != null&&mediaItems.size() > 0 ) {
             setEnable(true);
             if (poistion == 0) {
                 btnPre.setBackgroundResource(R.drawable.btn_pre_gray);

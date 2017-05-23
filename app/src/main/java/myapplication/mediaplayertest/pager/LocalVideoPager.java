@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.AdapterView;
@@ -52,6 +53,7 @@ public class LocalVideoPager extends BaseFragment{
                 intent.putExtra("position",position);
                 intent.putExtras(bunlder);
                 startActivity(intent);
+
             }
         });
         return view;

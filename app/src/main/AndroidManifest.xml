@@ -281,6 +281,9 @@
         <activity android:name=".activity.VitamioVideoPlayerActivity"
             android:screenOrientation="landscape"
             android:launchMode="singleTask"
+            android:theme="@style/noAnimation_Theme"
+
+
             ></activity>
     </application>
 

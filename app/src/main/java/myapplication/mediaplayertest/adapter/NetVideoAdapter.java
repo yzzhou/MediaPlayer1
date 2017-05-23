@@ -31,7 +31,7 @@ public class NetVideoAdapter extends BaseAdapter {
         this.datas = datas;
         utils = new Utils();
         imageOptions = new ImageOptions.Builder()
-                .setIgnoreGif(false)//是否忽略gif图。false表示不忽略。不写这句，默认是true
+                .setIgnoreGif(false)
                 .setImageScaleType(ImageView.ScaleType.CENTER_CROP)
                 .setFailureDrawableId(R.drawable.video_default)
                 .setLoadingDrawableId(R.drawable.video_default)
@@ -69,7 +69,7 @@ public class NetVideoAdapter extends BaseAdapter {
             viewHolder = (ViewHolder) convertView.getTag();
         }
 
-        //根据位置得到对应的数据
+
         MoveInfo.TrailersBean trailersBean = datas.get(position);
         viewHolder.tv_name.setText(trailersBean.getMovieName());
         viewHolder.tv_size.setText(trailersBean.getVideoLength()+"秒");
