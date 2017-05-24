@@ -9,10 +9,15 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.PixelCopy;
 import android.widget.RadioGroup;
+
+import com.tbruyelle.rxpermissions2.RxPermissions;
 
 import java.util.ArrayList;
 
+import io.reactivex.annotations.NonNull;
+import io.reactivex.functions.Consumer;
 import myapplication.mediaplayertest.fragment.BaseFragment;
 import myapplication.mediaplayertest.pager.LocalAudioPager;
 import myapplication.mediaplayertest.pager.LocalVideoPager;
@@ -25,15 +30,18 @@ public class Main2Activity extends AppCompatActivity {
     private int position;
     private Fragment tempFragment;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main2);
         isGrantExternalRW(this);
         initFragment();
+
         rg_main = (RadioGroup) findViewById(R.id.rg_main);
         rg_main.setOnCheckedChangeListener(new MyOnCheckedChangeListener());
         rg_main.check(R.id.rb_local_video);
+
     }
 
     private void initFragment() {
@@ -101,4 +109,5 @@ public class Main2Activity extends AppCompatActivity {
 
         return true;
     }
+
 }

@@ -2,6 +2,7 @@ package myapplication.mediaplayertest.pager;
 
 import android.app.VoiceInteractor;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
@@ -35,6 +36,8 @@ import myapplication.mediaplayertest.fragment.BaseFragment;
  */
 
 public class NetVideoPager extends BaseFragment {
+    public static final String uri = "http://api.m.mtime.cn/PageSubArea/TrailerList.api";
+    private SharedPreferences sp;
     private TextView tv_nodata;
     private ListView lv;
     private NetVideoAdapter adapter;
@@ -45,6 +48,7 @@ public class NetVideoPager extends BaseFragment {
 
     @Override
     public View initView() {
+        sp = context.getSharedPreferences("atguigu",context.MODE_PRIVATE);
         View view = View.inflate(context, R.layout.fragment_net_video_pager, null);
         tv_nodata = (TextView) view.findViewById(R.id.tv_nodata);
         lv = (ListView) view.findViewById(R.id.lv);
@@ -115,14 +119,22 @@ public class NetVideoPager extends BaseFragment {
     public void initData() {
         super.initData();
         Log.e("TAG", "NetVideoPager-initData");
+        String saveJson = sp.getString(uri,"");
+        if(saveJson !=null){
+            processData(saveJson);
+            Log.e("TAG","解析缓存的数据=="+saveJson);
+        }
+
         getDataFromNet();
     }
 
     private void getDataFromNet() {
-        final RequestParams request = new RequestParams("http://api.m.mtime.cn/PageSubArea/TrailerList.api");
+        final RequestParams request = new RequestParams(uri);
         x.http().get(request, new Callback.CommonCallback<String>() {
             @Override
             public void onSuccess(String result) {
+                //SharedPreferences.Editor edit = sp.edit();
+                sp.edit().putString(uri,result).commit();
 
                 Log.e("TAG", "xUtils联网成功==" + result);
                 processData(result);
