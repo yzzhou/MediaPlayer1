@@ -22,6 +22,7 @@ import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -380,6 +381,7 @@ public class VitamioVideoPlayerActivity extends AppCompatActivity implements Vie
         }
     }
     private  float startY;
+    private  float startX;
     private float touchRang;
     private  int currentVolume;
 
@@ -389,6 +391,7 @@ public class VitamioVideoPlayerActivity extends AppCompatActivity implements Vie
         switch (event.getAction()){
             case MotionEvent.ACTION_DOWN:
                 startY = event.getY();
+                startX= event.getX();
 
                 touchRang =Math.min(screenWidth, screenHeight);
                 currentVolume = am.getStreamVolume(AudioManager.STREAM_MUSIC);
@@ -397,21 +400,43 @@ public class VitamioVideoPlayerActivity extends AppCompatActivity implements Vie
             case MotionEvent.ACTION_MOVE:
                 float endY = event.getY();
                 float distanceY = startY - endY;
-                float delta = (distanceY/touchRang)*maxVoice;
 
-                if(delta != 0){
-                    int volum = (int) Math.min(Math.max(currentVolume + delta, 0), maxVoice);
-                    updatavolumeProgress(volum);
+                if(startX>screenWidth/2){
+                    float delta = (distanceY/touchRang)*maxVoice;
+                    if(delta != 0){
+                        int volum = (int) Math.min(Math.max(currentVolume + delta, 0), maxVoice);
+                        updatavolumeProgress(volum);
 
+                    }
+                }else{
+                    final double FLING_MIN_DISTANCE = 0.5;
+                    final double FLING_MIN_VELOCITY = 0.5;
+                    if (startY - endY > FLING_MIN_DISTANCE
+                            && Math.abs(distanceY) > FLING_MIN_VELOCITY) {
+                        setBrightness(10);
+                    }
+                    if (startY - endY < FLING_MIN_DISTANCE
+                            && Math.abs(distanceY) > FLING_MIN_VELOCITY) {
+                        setBrightness(-10);
+                    }
                 }
-
-
                 break;
             case MotionEvent.ACTION_UP:
                 handler.sendEmptyMessageDelayed(HIDE_MEDIACONTROLLER,5000);
                 break;
         }
         return true;
+    }
+    public void setBrightness(float brightness) {
+        WindowManager.LayoutParams lp = getWindow().getAttributes();
+        lp.screenBrightness = lp.screenBrightness + brightness / 255.0f;
+        if (lp.screenBrightness > 1) {
+            lp.screenBrightness = 1;
+        } else if (lp.screenBrightness < 0.1) {
+            lp.screenBrightness = (float) 0.1;
+        }
+        getWindow().setAttributes(lp);
+
     }
 
 
