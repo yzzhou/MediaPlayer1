@@ -19,6 +19,7 @@ import java.util.ArrayList;
 
 
 import myapplication.mediaplayertest.R;
+import myapplication.mediaplayertest.activity.AudioplayerActivity;
 import myapplication.mediaplayertest.activity.SystemVideoPlayerActivity;
 import myapplication.mediaplayertest.adapter.LocalVideoAdapter;
 import myapplication.mediaplayertest.domain.MediaItem;
@@ -46,7 +47,7 @@ public class LocalAudioPager extends BaseFragment{
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 //                MediaItem item = adapter.getItem(position);
 //                Toast.makeText(context, ""+item.toString(), Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(context,SystemVideoPlayerActivity.class);
+                Intent intent = new Intent(context,AudioplayerActivity.class);
                 Bundle bunlder = new Bundle();
                 bunlder.putSerializable("videolist",mediaItems);
                 intent.putExtra("position",position);

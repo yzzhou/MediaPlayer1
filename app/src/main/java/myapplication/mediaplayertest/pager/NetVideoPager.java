@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -120,7 +121,7 @@ public class NetVideoPager extends BaseFragment {
         super.initData();
         Log.e("TAG", "NetVideoPager-initData");
         String saveJson = sp.getString(uri,"");
-        if(saveJson !=null){
+        if(!TextUtils.isEmpty(saveJson)){
             processData(saveJson);
             Log.e("TAG","解析缓存的数据=="+saveJson);
         }

@@ -32,7 +32,8 @@
             android:name=".activity.SystemVideoPlayerActivity"
             android:label="@string/player_name"
             android:screenOrientation="landscape"
-            android:theme="@style/myScreen">
+
+            android:theme="@style/noAnimation_Theme">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
