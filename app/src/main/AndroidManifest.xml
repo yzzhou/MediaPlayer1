@@ -284,14 +284,15 @@
             android:launchMode="singleTask"
             android:screenOrientation="landscape"
             android:theme="@style/noAnimation_Theme" />
-        <activity android:name=".activity.AudioplayerActivity"></activity>
+        <activity android:name=".activity.AudioplayerActivity">
+            <intent-filter>
+                <action android:name="myapplication.mediaplayertest.activity.AudioplayerActivity"/>
+            </intent-filter>
+        </activity>
         <service android:name=".service.MusicPlayService">
             <intent-filter>
-                <action android:name="com.atguigu.mediaPlayerTest.service.MUSICPLAYSERVICE"/>
-
-
+                <action android:name="myapplication.mediaplayertest.service.MUSICPLAYSERVICE"/>
             </intent-filter>
-
         </service>
     </application>
 
