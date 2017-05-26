@@ -97,10 +97,11 @@ public class LocalVideoPager extends BaseFragment{
                         long size = cursor.getLong(cursor.getColumnIndex(MediaStore.Video.Media.SIZE));
                         String data = cursor.getString(cursor.getColumnIndex(MediaStore.Video.Media.DATA));
                         mediaItems.add(new MediaItem(name,duration,size,data));
-                        handler.sendEmptyMessage(0);
+
                     }
                     cursor.close();
                 }
+                handler.sendEmptyMessage(0);
             }
         }.start();
     }

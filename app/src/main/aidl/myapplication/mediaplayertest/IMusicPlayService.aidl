@@ -14,11 +14,16 @@ interface IMusicPlayService {
              void openAudio(int position);
              void start();
              void pause();
-             String getAetistName();
+             String getArtistName();
+             String getAudioName();
              String getAudioPath();
+
              int getDuration();
+             int getCurrentPosition() ;
              void seekTo(int position);
              void next();
              void pre();
               boolean isPlaying();
+              int getPlaymode();
+              void setPlaymode(int playmode);
 }

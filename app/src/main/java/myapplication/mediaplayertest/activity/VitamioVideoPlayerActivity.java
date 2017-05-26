@@ -88,12 +88,13 @@ public class VitamioVideoPlayerActivity extends AppCompatActivity implements Vie
     private float maxVolume;
     private static final int PROGRESS = 0;
     private Vibrator vibrator;
-    private boolean isNetUri;
     private LinearLayout ll_buffering;
     private LinearLayout ll_loading;
     private TextView tv_loading_net_speed;
     private TextView tv_net_speed;
     private int position;
+    private boolean isNetUri = true;
+
 
 
     private void findViews() {
@@ -133,21 +134,22 @@ public class VitamioVideoPlayerActivity extends AppCompatActivity implements Vie
 
         seekbarVoice.setMax(maxVoice);
         seekbarVoice.setProgress(currentVoice);
+        handler.sendEmptyMessage(SHOW_NET_SPEED);
     }
     private boolean isFullScreen = false;
     @Override
     public void onClick(View v) {
         if ( v == btnVoice ) {
-            if (v == btnVoice) {
+
                 isMute = !isMute;
                 updateVoice(isMute);
-            }
+
 
         } else if ( v == btnSwitchPlayer ) {
             switchPlayer();
 
         } else if ( v == btnExit ) {
-
+            finish();
         } else if ( v == btnPre ) {
             setPreVideo();
 
@@ -250,13 +252,26 @@ public class VitamioVideoPlayerActivity extends AppCompatActivity implements Vie
     }
 
 
-
+    private int preCurrentPosition;
+    private static final int SHOW_NET_SPEED = 2;
     private Handler handler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             switch (msg.what){
+                case SHOW_NET_SPEED:
+                    if(isNetUri){
+                        String speed = utils.getNetSpeed(VitamioVideoPlayerActivity.this);
+                        tv_loading_net_speed.setText("正在加载中..."+speed);
+                        tv_net_speed.setText("正在缓存..."+speed);
+
+                        //removeMessages(SHOW_NET_SPEED);
+                        sendEmptyMessageDelayed(SHOW_NET_SPEED,1000);
+                    }
+                    break;
                 case PROGRESS:
+
+
                     int currentPosition = (int) vv.getCurrentPosition();
                     seekbarVideo.setProgress(currentPosition);
 
@@ -322,7 +337,7 @@ public class VitamioVideoPlayerActivity extends AppCompatActivity implements Vie
 
     private void initData() {
         utils = new Utils();
-        receiver = new VitamioVideoPlayerActivity.MyBroadCastReceiver();
+        receiver = new MyBroadCastReceiver();
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_BATTERY_CHANGED);
         registerReceiver(receiver, intentFilter);
@@ -481,7 +496,7 @@ public class VitamioVideoPlayerActivity extends AppCompatActivity implements Vie
         llTop.setVisibility(View.GONE);
         isshowMediaController= false;
     }
-    private void showMediaController(){
+    public void showMediaController(){
         llBottom.setVisibility(View.VISIBLE);
         llTop.setVisibility(View.VISIBLE);
         isshowMediaController= true;
@@ -529,8 +544,9 @@ public class VitamioVideoPlayerActivity extends AppCompatActivity implements Vie
                 seekbarVideo.setMax(duration);
                 tvDuration.setText(utils.stringForTime(duration));
                 vv.start();
-                ll_loading.setVisibility(View.GONE);
+
                 handler.sendEmptyMessage(PROGRESS);
+                ll_loading.setVisibility(View.GONE);
                 hideMediaController();
                 setVideoType(DEFUALT_SCREEN);
             }
@@ -584,20 +600,26 @@ public class VitamioVideoPlayerActivity extends AppCompatActivity implements Vie
         });
 
 
-        vv.setOnInfoListener(new MediaPlayer.OnInfoListener() {
-            @Override
-            public boolean onInfo(MediaPlayer mp, int what, int extra) {
-                switch (what){
-                    case MediaPlayer.MEDIA_INFO_BUFFERING_START:
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            vv.setOnInfoListener(new MediaPlayer.OnInfoListener() {
+                @Override
+                public boolean onInfo(MediaPlayer mp, int what, int extra) {
+                    switch (what) {
+                        //拖动卡，缓存卡
+                        case MediaPlayer.MEDIA_INFO_BUFFERING_START:
+                            ll_buffering.setVisibility(View.VISIBLE);
+                            break;
+                        //拖动卡，缓存卡结束
+                        case MediaPlayer.MEDIA_INFO_BUFFERING_END:
+                            ll_buffering.setVisibility(View.GONE);
+                            break;
+                    }
 
-                        break;
-                    case MediaPlayer.MEDIA_INFO_BUFFERING_END:
-
-                        break;
+                    return true;
                 }
-                return true;
-            }
-        });
+            });
+        }
+
 
         seekbarVoice.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -631,7 +653,7 @@ public class VitamioVideoPlayerActivity extends AppCompatActivity implements Vie
 
                         }
                     })
-                    .setNegativeButton("取消", null)
+
                     .show();
 
     }
@@ -652,6 +674,7 @@ public class VitamioVideoPlayerActivity extends AppCompatActivity implements Vie
         if(poistion>0) {
             MediaItem mediaItem = mediaItems.get(poistion);
             isNetUri =  utils.isNetUri(mediaItem.getData());
+            ll_loading.setVisibility(View.VISIBLE);
             vv.setVideoPath(mediaItem.getData());
             tvName.setText(mediaItem.getName());
             setButtonstatus();
@@ -662,6 +685,7 @@ public class VitamioVideoPlayerActivity extends AppCompatActivity implements Vie
         if(poistion<mediaItems.size()) {
             MediaItem mediaItem = mediaItems.get(poistion);
             isNetUri =  utils.isNetUri(mediaItem.getData());
+            ll_loading.setVisibility(View.VISIBLE);
             vv.setVideoPath(mediaItem.getData());
             tvName.setText(mediaItem.getName());
             setButtonstatus();

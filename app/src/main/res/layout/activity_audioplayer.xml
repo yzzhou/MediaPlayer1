@@ -4,7 +4,7 @@
     android:id="@+id/activity_audioplayer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-
+    android:background="@drawable/base_bg"
     tools:context="myapplication.mediaplayertest.activity.AudioplayerActivity">
 
         <RelativeLayout
@@ -39,6 +39,7 @@
                 android:textSize="18sp" />
 
         </RelativeLayout>
+
     <LinearLayout
             android:id="@+id/ll_bottom"
             android:layout_width="match_parent"
@@ -114,5 +115,11 @@
             </LinearLayout>
 
     </LinearLayout>
+    <myapplication.mediaplayertest.view.LyricShow
+        android:id="@+id/lyricShow"
+        android:layout_below="@id/rl_top"
+        android:layout_above="@id/ll_bottom"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 
 </RelativeLayout>

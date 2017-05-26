@@ -52,11 +52,11 @@ public class Main2Activity extends AppCompatActivity {
         fragments.add(new NetVideoPager());
     }
 
-    class MyOnCheckedChangeListener implements RadioGroup.OnCheckedChangeListener{
+    class MyOnCheckedChangeListener implements RadioGroup.OnCheckedChangeListener {
 
         @Override
         public void onCheckedChanged(RadioGroup group, int checkedId) {
-            switch (checkedId){
+            switch (checkedId) {
                 case R.id.rb_local_video:
                     position = 0;
                     break;
@@ -75,7 +75,7 @@ public class Main2Activity extends AppCompatActivity {
             BaseFragment cueeentFragment = fragments.get(position);
             addFragment(cueeentFragment);
         }
-
+    }
         private void addFragment(Fragment cueeentFragment) {
             if(tempFragment != cueeentFragment){
                 FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
@@ -85,15 +85,16 @@ public class Main2Activity extends AppCompatActivity {
                     }
                     ft.add(R.id.fl_content,cueeentFragment);
                 }else{
-                    ft.show(cueeentFragment);
+
                     if(tempFragment != null){
                         ft.hide(tempFragment);
                     }
+                    ft.show(cueeentFragment);
                 }
                 ft.commit();
                 tempFragment = cueeentFragment;
             }
-        }
+
     }
     public static boolean isGrantExternalRW(Activity activity) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && activity.checkSelfPermission(

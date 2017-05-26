@@ -1,11 +1,16 @@
 package myapplication.mediaplayertest.activity;
 
+import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.graphics.drawable.AnimationDrawable;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.support.v7.app.AppCompatActivity;
@@ -19,9 +24,21 @@ import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
+import java.io.File;
+import java.util.ArrayList;
+
 import myapplication.mediaplayertest.IMusicPlayService;
 import myapplication.mediaplayertest.R;
+import myapplication.mediaplayertest.domain.Lyric;
+import myapplication.mediaplayertest.domain.MediaItem;
 import myapplication.mediaplayertest.service.MusicPlayService;
+import myapplication.mediaplayertest.utils.LyricUitls;
+import myapplication.mediaplayertest.utils.Utils;
+import myapplication.mediaplayertest.view.LyricShow;
 
 public class AudioplayerActivity extends AppCompatActivity implements View.OnClickListener {
     private ImageView iv_icon;
@@ -39,6 +56,51 @@ public class AudioplayerActivity extends AppCompatActivity implements View.OnCli
     private Button btnLyric;
     private int position;
     private IMusicPlayService service;
+    private MyReceiver receiver;
+    private Utils utils;
+    private   final  static int PROGRESS=0;
+    private   final  static int SHOW_LYRIC=1;
+    private boolean notification;
+    private LyricShow lyricShow;
+
+
+    private Handler handler = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what){
+                case SHOW_LYRIC:
+                    try {
+                        int currentPosition = service.getCurrentPosition();
+                        lyricShow.setNextLyricShow(currentPosition);
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+                    removeMessages(SHOW_LYRIC);
+                    sendEmptyMessage(SHOW_LYRIC);
+
+                    break;
+                case PROGRESS:
+                    try {
+                        int currentPosition = service.getCurrentPosition();
+                        seekbarAudio.setProgress(currentPosition);
+
+                        //设置更新时间
+                        tvTime.setText(utils.stringForTime(currentPosition) + "/" + utils.stringForTime(service.getDuration()));
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+
+
+                    //每秒中更新一次
+                    removeMessages(PROGRESS);
+                    sendEmptyMessageDelayed(PROGRESS, 1000);
+
+                    break;
+
+            }
+        }
+    };
     private ServiceConnection conon = new ServiceConnection(){
 
         @Override
@@ -46,7 +108,12 @@ public class AudioplayerActivity extends AppCompatActivity implements View.OnCli
                 service=IMusicPlayService.Stub.asInterface(iBinder);
             if(service !=null){
                 try {
-                    service.openAudio(position);
+                    if(notification){
+                        setViewData(null);
+                    }else{
+                        service.openAudio(position);
+                    }
+
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }
@@ -57,15 +124,12 @@ public class AudioplayerActivity extends AppCompatActivity implements View.OnCli
         public void onServiceDisconnected(ComponentName name) {
 
         }
+
+
     };
 
-    /**
-     * Find the Views in the layout<br />
-     * <br />
-     * Auto-created on 2017-05-25 11:02:39 by Android Layout Finder
-     * (http://www.buzzingandroid.com/tools/android-layout-finder)
-     */
     private void findViews() {
+        setContentView(R.layout.activity_audioplayer);
         ivIcon = (ImageView)findViewById(R.id.iv_icon);
         ivIcon.setBackgroundResource(R.drawable.animation_bg);
         AnimationDrawable background = (AnimationDrawable) ivIcon.getBackground();
@@ -81,6 +145,7 @@ public class AudioplayerActivity extends AppCompatActivity implements View.OnCli
         btnPre = (Button)findViewById( R.id.btn_pre );
         btnStartPause = (Button)findViewById( R.id.btn_start_pause );
         btnNext = (Button)findViewById( R.id.btn_next );
+        lyricShow = (LyricShow)findViewById(R.id.lyricShow);
         btnLyric = (Button)findViewById( R.id.btn_lyric );
 
         btnPlaymode.setOnClickListener( this );
@@ -88,8 +153,31 @@ public class AudioplayerActivity extends AppCompatActivity implements View.OnCli
         btnStartPause.setOnClickListener( this );
         btnNext.setOnClickListener( this );
         btnLyric.setOnClickListener( this );
-    }
 
+        seekbarAudio.setOnSeekBarChangeListener(new MyOnSeekBarChangeListener());
+    }
+    class MyOnSeekBarChangeListener implements SeekBar.OnSeekBarChangeListener {
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            if(fromUser){
+                try {
+                    service.seekTo(progress);
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) {
+
+        }
+
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {
+
+        }
+    }
     /**
      * Handle button click events<br />
      * <br />
@@ -100,8 +188,14 @@ public class AudioplayerActivity extends AppCompatActivity implements View.OnCli
     public void onClick(View v) {
         if ( v == btnPlaymode ) {
             // Handle clicks for btnPlaymode
+            setPlayMode();
         } else if ( v == btnPre ) {
             // Handle clicks for btnPre
+            try {
+                service.pre();
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
         } else if ( v == btnStartPause ) {
             // Handle clicks for btnStartPause
 
@@ -120,40 +214,119 @@ public class AudioplayerActivity extends AppCompatActivity implements View.OnCli
 
         } else if ( v == btnNext ) {
             // Handle clicks for btnNext
+            try {
+                service.next();
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
         } else if ( v == btnLyric ) {
             // Handle clicks for btnLyric
+        }
+    }
+
+    private void setPlayMode() {
+        try {
+            int playmode = service.getPlaymode();
+            if (playmode == MusicPlayService.REPEAT_NORMAL) {
+                playmode = MusicPlayService.REPEAT_SINGLE;
+            } else if (playmode == MusicPlayService.REPEAT_SINGLE) {
+                playmode = MusicPlayService.REPEAT_ALL;
+            } else if (playmode == MusicPlayService.REPEAT_ALL) {
+                playmode = MusicPlayService.REPEAT_NORMAL;
+            }
+            service.setPlaymode(playmode);
+            setButtonImage();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+    private void setButtonImage() {
+        try {
+
+            int playmode = service.getPlaymode();
+            if (playmode == MusicPlayService.REPEAT_NORMAL) {
+                btnPlaymode.setBackgroundResource(R.drawable.btn_playmode_normal_selector);
+            } else if (playmode == MusicPlayService.REPEAT_SINGLE) {
+                btnPlaymode.setBackgroundResource(R.drawable.btn_playmode_single_selector);
+            } else if (playmode == MusicPlayService.REPEAT_ALL) {
+                btnPlaymode.setBackgroundResource(R.drawable.btn_playmode_all_selector);
+            }
+        } catch (RemoteException e) {
+            e.printStackTrace();
         }
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_audioplayer);
 
+        initData();
         findViews();
         getData();
         startAndBindService();
 
     }
 
-    private void startAndBindService() {
-        Intent intent = new Intent(this,MusicPlayService.class);
-        bindService(intent,conon, Context.BIND_AUTO_CREATE);
-        startService(intent);
+    private void initData() {
+
+        receiver = new MyReceiver();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(MusicPlayService.OPEN_COMPLETE);
+        registerReceiver(receiver, intentFilter);
+        utils = new Utils();
+        EventBus.getDefault().register(this);
+
     }
 
-    private void getData() {
-        position =getIntent().getIntExtra("position",0);
-    }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if(conon !=null){
-            unbindService(conon);
-            conon =null;
+
+
+
+
+
+    class MyReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            setViewData(null);
         }
     }
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void setViewData(MediaItem mediaItem) {
+        try {
+
+            tvArtist.setText(service.getArtistName());
+            tvAudioname.setText(service.getAudioName());
+            setButtonImage();
+            int duration = service.getDuration();
+            seekbarAudio.setMax(duration);
+            String audioPath = service.getAudioPath();
+
+            String lyricPath = audioPath.substring(0,audioPath.lastIndexOf("."));
+            File file = new File(lyricPath+".lrc");
+            if(!file.exists()){
+                file = new File(lyricPath+".txt");
+            }
+            LyricUitls lyricsUtils = new LyricUitls();
+            lyricsUtils.readFile(file);
+
+            ArrayList<Lyric> lyrics = lyricsUtils.getLyrics();
+            lyricShow.setLyrics(lyrics);
+            if(lyricsUtils.isLyric()){
+                handler.sendEmptyMessage(SHOW_LYRIC);
+            }
+
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+        handler.sendEmptyMessage(PROGRESS);
+        //handler.sendEmptyMessage(SHOW_LYRIC);
+    }
+
+
+
+
+
+
     //    @Override
 //    public void onCreate(Bundle savedInstanceState, PersistableBundle persistentState) {
 //        super.onCreate(savedInstanceState, persistentState);
@@ -162,4 +335,36 @@ public class AudioplayerActivity extends AppCompatActivity implements View.OnCli
 //
 //    }
     //private void
+
+    private void getData() {
+        notification = getIntent().getBooleanExtra("notification",false);
+        if(!notification){
+            position =getIntent().getIntExtra("position",0);
+        }
+
+    }
+
+    @Override
+    protected void onDestroy() {
+
+        if(conon !=null){
+            unbindService(conon);
+            conon =null;
+        }
+        if (receiver != null) {
+            unregisterReceiver(receiver);
+            receiver = null;
+        }
+        EventBus.getDefault().unregister(this);
+        if(handler !=null){
+            handler.removeCallbacksAndMessages(null);
+        }
+        super.onDestroy();
+    }
+    private void startAndBindService() {
+        Intent intent = new Intent(this,MusicPlayService.class);
+        bindService(intent,conon, Context.BIND_AUTO_CREATE);
+        startService(intent);
+    }
+
 }

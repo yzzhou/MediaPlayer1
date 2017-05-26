@@ -48,10 +48,10 @@ public class LocalAudioPager extends BaseFragment{
 //                MediaItem item = adapter.getItem(position);
 //                Toast.makeText(context, ""+item.toString(), Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(context,AudioplayerActivity.class);
-                Bundle bunlder = new Bundle();
-                bunlder.putSerializable("videolist",mediaItems);
+                //Bundle bunlder = new Bundle();
+               // bunlder.putSerializable("videolist",mediaItems);
                 intent.putExtra("position",position);
-                intent.putExtras(bunlder);
+                intent.putExtra("notification",false);
                 startActivity(intent);
 
             }
