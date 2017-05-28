@@ -3,21 +3,21 @@ package myapplication.mediaplayertest;
 import android.Manifest;
 import android.app.Activity;
 import android.content.pm.PackageManager;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
 import android.os.Build;
+import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.view.PixelCopy;
+import android.view.KeyEvent;
 import android.widget.RadioGroup;
-
-import com.tbruyelle.rxpermissions2.RxPermissions;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
-import io.reactivex.annotations.NonNull;
-import io.reactivex.functions.Consumer;
+import fm.jiecao.jcvideoplayer_lib.JCVideoPlayer;
 import myapplication.mediaplayertest.fragment.BaseFragment;
 import myapplication.mediaplayertest.pager.LocalAudioPager;
 import myapplication.mediaplayertest.pager.LocalVideoPager;
@@ -29,6 +29,8 @@ public class Main2Activity extends AppCompatActivity {
     private ArrayList<BaseFragment> fragments;
     private int position;
     private Fragment tempFragment;
+    private SensorManager sensorManager;
+    private JCVideoPlayer.JCAutoFullscreenListener sensorEventListener;
 
 
     @Override
@@ -41,6 +43,8 @@ public class Main2Activity extends AppCompatActivity {
         rg_main = (RadioGroup) findViewById(R.id.rg_main);
         rg_main.setOnCheckedChangeListener(new MyOnCheckedChangeListener());
         rg_main.check(R.id.rb_local_video);
+        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        sensorEventListener = new JCVideoPlayer.JCAutoFullscreenListener();
 
     }
 
@@ -109,6 +113,50 @@ public class Main2Activity extends AppCompatActivity {
         }
 
         return true;
+    }
+    private boolean isExit = false;
+    //private Handler handler = new Handler();
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if(keyCode ==KeyEvent.KEYCODE_BACK){
+            if(position !=0){
+                rg_main.check(R.id.rb_local_video);
+                return  true;
+            }else if(!isExit){
+                Toast.makeText(Main2Activity.this, "再按一次退出", Toast.LENGTH_SHORT).show();
+                isExit=true;
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        isExit = false ;
+                    }
+                },2000);
+                return true;
+            }
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Sensor accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        sensorManager.registerListener(sensorEventListener, accelerometerSensor, SensorManager.SENSOR_DELAY_NORMAL);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        sensorManager.unregisterListener(sensorEventListener);
+        JCVideoPlayer.releaseAllVideos();
+    }
+
+
+    @Override
+    public void onBackPressed() {
+        if (JCVideoPlayer.backPress()) {
+            return;
+        }
+        super.onBackPressed();
     }
 
 }

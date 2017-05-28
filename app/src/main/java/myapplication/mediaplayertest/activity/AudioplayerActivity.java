@@ -1,6 +1,5 @@
 package myapplication.mediaplayertest.activity;
 
-import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -8,15 +7,14 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.graphics.drawable.AnimationDrawable;
+import android.media.audiofx.Visualizer;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.View;
-import android.view.animation.Animation;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -38,6 +36,7 @@ import myapplication.mediaplayertest.domain.MediaItem;
 import myapplication.mediaplayertest.service.MusicPlayService;
 import myapplication.mediaplayertest.utils.LyricUitls;
 import myapplication.mediaplayertest.utils.Utils;
+import myapplication.mediaplayertest.view.BaseVisualizerView;
 import myapplication.mediaplayertest.view.LyricShow;
 
 public class AudioplayerActivity extends AppCompatActivity implements View.OnClickListener {
@@ -62,6 +61,8 @@ public class AudioplayerActivity extends AppCompatActivity implements View.OnCli
     private   final  static int SHOW_LYRIC=1;
     private boolean notification;
     private LyricShow lyricShow;
+    private Visualizer mVisualizer;
+    private BaseVisualizerView visualizerview;
 
 
     private Handler handler = new Handler(){
@@ -147,6 +148,7 @@ public class AudioplayerActivity extends AppCompatActivity implements View.OnCli
         btnNext = (Button)findViewById( R.id.btn_next );
         lyricShow = (LyricShow)findViewById(R.id.lyricShow);
         btnLyric = (Button)findViewById( R.id.btn_lyric );
+        visualizerview = (BaseVisualizerView)findViewById(R.id.visualizerview);
 
         btnPlaymode.setOnClickListener( this );
         btnPre.setOnClickListener( this );
@@ -320,11 +322,24 @@ public class AudioplayerActivity extends AppCompatActivity implements View.OnCli
         }
         handler.sendEmptyMessage(PROGRESS);
         //handler.sendEmptyMessage(SHOW_LYRIC);
+        setupVisualizerFxAndUi();
     }
 
-
-
-
+    private void setupVisualizerFxAndUi() {
+        int audioSessionid = 0;
+                try {
+                        audioSessionid = service.getAudioSessionId();
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+                System.out.println("audioSessionid==" + audioSessionid);
+                mVisualizer = new Visualizer(audioSessionid);
+                // 参数内必须是2的位数
+                        mVisualizer.setCaptureSize(Visualizer.getCaptureSizeRange()[1]);
+                // 设置允许波形表示，并且捕获它
+                        visualizerview.setVisualizer(mVisualizer);
+                mVisualizer.setEnabled(true);
+    }
 
 
     //    @Override
@@ -342,6 +357,14 @@ public class AudioplayerActivity extends AppCompatActivity implements View.OnCli
             position =getIntent().getIntExtra("position",0);
         }
 
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if(isFinishing()){
+            mVisualizer.release();
+        }
     }
 
     @Override

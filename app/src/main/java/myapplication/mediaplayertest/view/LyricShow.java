@@ -10,12 +10,14 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 import myapplication.mediaplayertest.domain.Lyric;
+import myapplication.mediaplayertest.utils.DensityUtil;
 
 /**
  * Created by zhouzhou on 2017/5/26.
  */
 
 public class LyricShow extends TextView {
+    private final Context conetext;
     private ArrayList<Lyric> lyrics;
     private Paint paintGreen;
     private Paint paintWhite;
@@ -23,10 +25,15 @@ public class LyricShow extends TextView {
     private  int width;
     private  int height;
     private   float  textHeight =20;
-    private int currentPosition;
+    private float currentPosition;
+    private long timePoint;
+    private long sleepTime;
+
+
 
     public LyricShow(Context context, AttributeSet attrs) {
         super(context, attrs);
+        this.conetext = context;
         initView();
     }
 
@@ -38,16 +45,20 @@ public class LyricShow extends TextView {
     }
 
     private void initView() {
+
+        textHeight = DensityUtil.dip2px(conetext,20);
         paintGreen = new Paint();
         paintGreen.setColor(Color.GREEN);
         paintGreen.setAntiAlias(true);
         paintGreen.setTextSize(16);
+        paintGreen.setTextSize(DensityUtil.dip2px(conetext,16));
         paintGreen.setTextAlign(Paint.Align.CENTER);
 
         paintWhite = new Paint();
         paintWhite.setColor(Color.WHITE);
         paintWhite.setAntiAlias(true);
         paintWhite.setTextSize(16);
+        paintWhite.setTextSize(DensityUtil.dip2px(conetext,16));
         paintWhite.setTextAlign(Paint.Align.CENTER);
 
 
@@ -107,7 +118,11 @@ public class LyricShow extends TextView {
                 int tempIndex = i-1;
                 if(currentPosition>=lyrics.get(tempIndex).getTimePoint()){
                     index = tempIndex;
+                    timePoint = lyrics.get(index).getTimePoint();
+                    sleepTime = lyrics.get(index).getSleepTime();
                 }
+            }else{
+                index = i;
             }
 
         }

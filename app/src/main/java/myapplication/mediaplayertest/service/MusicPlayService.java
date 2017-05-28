@@ -111,6 +111,11 @@ public class MusicPlayService extends Service {
             service.setPlaymode(playmode);
         }
 
+        @Override
+        public int getAudioSessionId() throws RemoteException {
+            return mediaPlayer.getAudioSessionId();
+        }
+
     };
 
 
@@ -222,8 +227,9 @@ public class MusicPlayService extends Service {
         @Override
         public void onPrepared(MediaPlayer mp) {
             //notifyChange(OPEN_COMPLETE);
+            start();
             EventBus.getDefault().post(mediaItem);
-                start();
+
         }
     }
 
@@ -374,13 +380,13 @@ public class MusicPlayService extends Service {
     }
 
     private int getDuration() {
-        return (int) mediaPlayer.getDuration();
+        return mediaPlayer.getDuration();
     }
 
 
 
     private int getCurrentPosition() {
-        return (int) mediaPlayer.getCurrentPosition();
+        return  mediaPlayer.getCurrentPosition();
     }
     public int getPlaymode() {
         return playmode;
