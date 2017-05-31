@@ -52,6 +52,13 @@
             style="@style/myStyle"
             android:drawableTop="@drawable/rb_net_video_selector"
             android:text="网络视频" />
+        <RadioButton
+            android:id="@+id/rb_recyclerview"
+            style="@style/bottom_tab_style"
+            android:drawableTop="@drawable/rb_net_video_selector"
+            android:text="Recyclerview"
+
+            />
 
 
     </RadioGroup>

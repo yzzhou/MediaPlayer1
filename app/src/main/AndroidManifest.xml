@@ -322,7 +322,7 @@
         </service>
 
         <activity android:name=".activity.SearchActivity" />
-        <activity android:name=".activity.ShowImageAndGifActivity"></activity>
+        <activity android:name=".activity.ShowImageAndGifActivity" />
     </application>
 
 </manifest>

@@ -18,6 +18,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 
 import fm.jiecao.jcvideoplayer_lib.JCVideoPlayer;
+import myapplication.mediaplayertest.activity.RecyclerViewFragment;
 import myapplication.mediaplayertest.fragment.BaseFragment;
 import myapplication.mediaplayertest.pager.LocalAudioPager;
 import myapplication.mediaplayertest.pager.LocalVideoPager;
@@ -54,6 +55,8 @@ public class Main2Activity extends AppCompatActivity {
         fragments.add(new LocalAudioPager());
         fragments.add(new NetAudioPager());
         fragments.add(new NetVideoPager());
+        fragments.add(new RecyclerViewFragment());
+
     }
 
     class MyOnCheckedChangeListener implements RadioGroup.OnCheckedChangeListener {
@@ -75,10 +78,14 @@ public class Main2Activity extends AppCompatActivity {
                     position = 3;
 
                     break;
+                case R.id.rb_recyclerview:
+                    position = 4;
+                    break;
             }
             BaseFragment cueeentFragment = fragments.get(position);
             addFragment(cueeentFragment);
         }
+
     }
         private void addFragment(Fragment cueeentFragment) {
             if(tempFragment != cueeentFragment){
